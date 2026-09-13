@@ -44,6 +44,12 @@ class TestNormalise(unittest.TestCase):
         self.assertIsNone(fields.normalise_type(["Composite"])[0])
         self.assertIsNone(fields.normalise_type([])[0])
 
+    def test_clean_date(self):
+        self.assertEqual(fields.clean_date("2026-01-21"), "2026-01-21")
+        self.assertIsNone(fields.clean_date("0"))
+        self.assertIsNone(fields.clean_date(""))
+        self.assertIsNone(fields.clean_date(None))
+
     def test_capacity_keeps_unit(self):
         self.assertEqual(
             fields.normalise_capacity("600000", "production capacity (yearly in dozen)"),

@@ -6,7 +6,7 @@ What it does, with no arguments:
     1. opens https://www.bgmea.com.bd/page/member-list in headless Chrome
     2. reads the pagination control to learn the real page count
     3. walks every list page and records each member's Details link
-    4. opens every Details page and reads the nine business fields
+    4. opens every Details page and reads the ten business fields
     5. writes output/bgmea_factories.xlsx  (one factory per row)
        and output/bgmea_factories_audit.xlsx  (why any field is blank)
 
@@ -157,7 +157,7 @@ def collect_member_index(driver, max_pages=None, pause=1.0):
                 continue
             seen.add(key)
             index.append(row)
-        print(f"  page {page}/{last}  members so far: {len(index)}")
+        print(f"  page {page}/{last}  members so far: {len(index)}", flush=True)
     return index
 
 
@@ -283,16 +283,20 @@ def main(argv=None):
                 record = None
 
             name = member["name"]
+            remaining = len(members) - i
             if record is None:
                 state["audit"].append([name, member.get("reg_no"),
                                        member.get("url"), "; ".join(notes)])
-                print(f"  [{i}/{len(members)}] {name}  SKIPPED: {notes[0]}")
+                print(f"  [{i}/{len(members)}] remaining={remaining}  "
+                      f"{name}  SKIPPED: {notes[0]}", flush=True)
             else:
                 state["records"].append(record)
                 state["audit"].append([
                     record["Name of factory"], record["BGMEA registration no."],
                     member.get("url"),
-                    "; ".join(notes) or "all nine fields populated"])
+                    "; ".join(notes) or "all ten fields populated"])
+                print(f"  [{i}/{len(members)}] remaining={remaining}  {name}",
+                      flush=True)
 
             done.add(key)
             state["done"] = sorted(done)
@@ -302,10 +306,9 @@ def main(argv=None):
                 save_state(state)
                 flush_excel(state, args.template)
                 rate = processed / max(time.monotonic() - started, 1e-6)
-                remaining = len(members) - i
                 eta = remaining / rate / 60 if rate else 0
-                print(f"  [{i}/{len(members)}]  {rate*60:.0f}/min  "
-                      f"ETA {eta:.0f} min")
+                print(f"  [{i}/{len(members)}]  remaining={remaining}  "
+                      f"{rate*60:.0f}/min  ETA {eta:.0f} min", flush=True)
 
         save_state(state)
         flush_excel(state, args.template, final=True)
@@ -320,7 +323,7 @@ def main(argv=None):
     print("=" * 46)
     print(f"  Members indexed     : {len(state['index'])}")
     print(f"  Factories written   : {len(records)}")
-    print(f"  All nine fields     : {complete}")
+    print(f"  All ten fields      : {complete}")
     print(f"  Some fields blank   : {len(records) - complete}")
     print(f"  Output              : {OUT / 'bgmea_factories.xlsx'}")
     print(f"  Audit / reasons     : {OUT / 'bgmea_factories_audit.xlsx'}")

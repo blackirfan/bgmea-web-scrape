@@ -1,4 +1,4 @@
-"""Turn one raw BGMEA member Details page into the nine business fields.
+"""Turn one raw BGMEA member Details page into the ten business fields.
 
 The page is server-rendered static HTML with three tab panes (Company, Address,
 Final) that are all present in the DOM even when not visible. Extraction is
@@ -43,6 +43,14 @@ def clean_int(value):
         return None
     number = int(m.group(0))
     return number or None
+
+
+def clean_date(value):
+    """'2026-01-21' stays as-is; '0' / blank (BGMEA's unset-date default) -> None."""
+    text = _ws(value)
+    if not text or text in {"0", "0000-00-00", "-", "N/A", "n/a"}:
+        return None
+    return text
 
 
 def clean_registration(value):
@@ -196,6 +204,7 @@ BUSINESS_COLUMNS = [
     "Name of factory",
     "BGMEA registration no.",
     "Address of factory",
+    "Date of Establishment",
     "Factory type (woven, knit, both)",
     "management",
     "Employee_male",
@@ -253,6 +262,9 @@ def extract(page_source, url=None):
 
     # -- registration ---------------------------------------------------- #
     reg = clean_registration(_find_row(rows, "reg. no", "reg no", "registration no"))
+
+    # -- date of establishment ------------------------------------------ #
+    established = clean_date(_find_row(rows, "date of establishment"))
 
     # -- factory type --------------------------------------------------- #
     type_values = []
@@ -321,6 +333,7 @@ def extract(page_source, url=None):
         "Name of factory": name or None,
         "BGMEA registration no.": reg,
         "Address of factory": address,
+        "Date of Establishment": established,
         "Factory type (woven, knit, both)": ftype,
         "management": str(management) if management is not None else None,
         "Employee_male": male,

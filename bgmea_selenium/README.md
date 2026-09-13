@@ -1,7 +1,7 @@
 # BGMEA member list — autonomous Selenium scraper
 
 Opens the BGMEA general member list in headless Chrome, walks every page,
-opens every factory's **Details** page, and writes the nine business columns to
+opens every factory's **Details** page, and writes the ten business columns to
 an Excel file. One factory per row. Runs to completion on its own with no
 arguments.
 
@@ -33,7 +33,7 @@ load (default 1.0 second); lower it only if the site stays responsive.
 
 | File | Contents |
 |---|---|
-| `bgmea_factories.xlsx` | the nine columns, one row per factory |
+| `bgmea_factories.xlsx` | the ten columns, one row per factory |
 | `bgmea_factories_audit.xlsx` | for every factory, which fields are blank and why |
 | `state.json` | resume checkpoint, written after each factory |
 
@@ -45,7 +45,7 @@ factory. The Excel files are rewritten in full at each checkpoint, so they are
 always complete for whatever has been read so far. `--restart` throws the
 checkpoint away and begins again.
 
-## The nine columns and where they come from
+## The ten columns and where they come from
 
 All values come from the member's Details page. The tab panes (Company,
 Address, Final) are all in the page HTML, so the scraper reads them without
@@ -56,6 +56,7 @@ clicking between tabs.
 | Name of factory | page title / header |
 | BGMEA registration no. | Company tab, "BGMEA Reg. No." — kept as text, so `5161` never becomes `5161.0` |
 | Address of factory | Address tab, "Factory Address" (the mailing address is used only if there is no factory address, and the two are never joined) |
+| Date of Establishment | Final tab, "Date of Establishment" |
 | Factory type (woven, knit, both) | Final tab, "Factory Type" table |
 | management | Final tab, "No. of Employees" table, Management column (a headcount, not an ownership category) |
 | Employee_male / Employee_female | Final tab, "No. of Employees" table |
